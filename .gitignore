@@ -1,0 +1,91 @@
+# Dependencies at any depth; keep package manifests and lockfiles.
+node_modules/
+/vendor/
+.pnp
+.pnp.*
+
+# Local environment files and private key material.
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Existing credential-bearing source: preserve locally, do not commit.
+# No credentials are removed or rotated during the baseline phase.
+/application/controllers/SmtpController.php
+/application/controllers/ExternalApi.php
+/application/controllers/PageController.php
+
+# Private database exports, verification details, and persistent user uploads.
+/application/database/
+/uploads/
+/database/
+*.sql
+*.sql.*
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Local backups and future database-volume directories.
+/backups/
+/private-backups/
+/docker-data/
+/docker/volumes/
+/docker/mysql/
+/docker/mariadb/
+/volumes/
+/mysql-data/
+/mariadb-data/
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Runtime files; retain the framework's directory scaffolding.
+/application/cache/*
+!/application/cache/index.html
+/application/logs/*
+!/application/logs/index.html
+*.log
+*.log.*
+*.pid
+*.sock
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+/tmp/
+/temp/
+
+# Generated frontend, test, and framework-documentation output.
+/frontend/build/
+/frontend/dist/
+/frontend/src/output.css
+coverage/
+/tests/tests/
+/tests/results/
+/user_guide_src/build/
+/user_guide_src/cilexer/build/
+/user_guide_src/cilexer/dist/
+/user_guide_src/cilexer/pycilexer.egg-info/
+
+# OS metadata and editor state.
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+/nbproject/
+.idea/
+.vscode/
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
