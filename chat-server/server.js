@@ -3,15 +3,19 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
+const port = Number(process.env.PORT || 3000);
+const persistenceUrl = process.env.PHP_PERSISTENCE_URL || "http://127.0.0.1/index.php/api/save_message";
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "*";
+
 const app = express();
-app.use(cors());
+app.use(cors({ origin: allowedOrigin }));
 
 const server = http.createServer(app);
 const users = {};
 
 const io = new Server(server, {
 	cors: {
-		origin: "*",
+		origin: allowedOrigin,
 	},
 });
 
@@ -33,7 +37,7 @@ io.on("connection", (socket) => {
 			params.append("message", data.message);
 
 			const response = await fetch(
-				"http://127.0.0.1/index.php/api/save_message",
+				persistenceUrl,
 				{
 					method: "POST",
 					headers: {
@@ -103,6 +107,6 @@ io.on("connection", (socket) => {
 	});
 });
 
-server.listen(3000, () => {
-	console.log("Servidor WebSocket corriendo en puerto 3000");
+server.listen(port, () => {
+	console.log(`Servidor WebSocket corriendo en puerto ${port}`);
 });

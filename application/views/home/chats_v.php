@@ -1,7 +1,7 @@
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
-    const socket = io("http://localhost:3000");
+    const socket = io(<?= json_encode($this->config->item('socket_io_url') ?? 'http://localhost:3000'); ?> || window.location.origin);
 
     // Enviar mensaje
     function enviarMensaje() {

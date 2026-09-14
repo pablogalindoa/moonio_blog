@@ -1,0 +1,141 @@
+name: moonio-dev
+
+services:
+  db:
+    image: mariadb:10.4.28
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: codeigniter
+      MYSQL_USER: ${DB_USER:-moonio}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Create .env with scripts/create-docker-env.py}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Create .env with scripts/create-docker-env.py}
+      TZ: America/Monterrey
+    entrypoint: ["/bin/sh", "/usr/local/bin/moonio-db-entrypoint.sh"]
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"]
+    volumes:
+      - db_data:/var/lib/mysql
+      - type: bind
+        source: ./docker/db/entrypoint.sh
+        target: /usr/local/bin/moonio-db-entrypoint.sh
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./application/database/current_codeigniter.sql
+        target: /seed/current_codeigniter.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql --user=\"$$MYSQL_USER\" --database=codeigniter --execute='SELECT 1 FROM employee LIMIT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        LOCAL_UID: ${LOCAL_UID:-1000}
+        LOCAL_GID: ${LOCAL_GID:-1000}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    environment:
+      CI_ENV: development
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080/blog/}
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: codeigniter
+      DB_USER: ${DB_USER:-moonio}
+      DB_PASSWORD: ${DB_PASSWORD:?Create .env with scripts/create-docker-env.py}
+      CI_SESSION_PATH: /var/lib/php/sessions
+      CI_LOG_PATH: /var/log/moonio/
+      CI_CACHE_PATH: /var/cache/moonio/
+      CI_LOG_THRESHOLD: "1"
+      SOCKET_IO_URL: ""
+    volumes:
+      - type: bind
+        source: .
+        target: /var/www/html/blog
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./uploads
+        target: /var/www/html/blog/uploads
+        bind:
+          create_host_path: false
+      - web_sessions:/var/lib/php/sessions
+      - web_logs:/var/log/moonio
+      - web_cache:/var/cache/moonio
+    tmpfs:
+      - /var/lib/php/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "/usr/local/bin/moonio-web-healthcheck.php"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  chat:
+    build:
+      context: ./chat-server
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      PHP_PERSISTENCE_URL: http://web/blog/index.php/api/save_message
+      ALLOWED_ORIGIN: ${CHAT_ALLOWED_ORIGIN:-http://localhost:8080}
+    volumes:
+      - type: bind
+        source: ./chat-server/server.js
+        target: /app/server.js
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/socket.io/?EIO=4&transport=polling').then(async r=>{if(!r.ok||!(await r.text()).startsWith('0'))process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.2-apache
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: "3306"
+      PMA_USER: ${DB_USER:-moonio}
+      PMA_PASSWORD: ${DB_PASSWORD:?Create .env with scripts/create-docker-env.py}
+      UPLOAD_LIMIT: 40M
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-d", "allow_url_fopen=1", "-r", "exit(@file_get_contents('http://127.0.0.1/') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  db_data:
+  web_sessions:
+  web_logs:
+  web_cache:

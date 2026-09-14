@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/blog/';
+$config['base_url'] = getenv('APP_BASE_URL') ?: 'http://localhost/blog/';
 
 /*
 |--------------------------------------------------------------------------
@@ -225,7 +225,7 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 0;
+$config['log_threshold'] = getenv('CI_LOG_THRESHOLD') !== FALSE ? (int) getenv('CI_LOG_THRESHOLD') : 0;
 
 /*
 |--------------------------------------------------------------------------
@@ -236,7 +236,7 @@ $config['log_threshold'] = 0;
 | application/logs/ directory. Use a full server path with trailing slash.
 |
 */
-$config['log_path'] = '';
+$config['log_path'] = getenv('CI_LOG_PATH') ?: '';
 
 /*
 |--------------------------------------------------------------------------
@@ -295,7 +295,7 @@ $config['error_views_path'] = '';
 | application/cache/ directory.  Use a full server path with trailing slash.
 |
 */
-$config['cache_path'] = '';
+$config['cache_path'] = getenv('CI_CACHE_PATH') ?: '';
 
 /*
 |--------------------------------------------------------------------------
@@ -387,7 +387,7 @@ $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 7200;
-$config['sess_save_path'] = NULL;
+$config['sess_save_path'] = getenv('CI_SESSION_PATH') ?: NULL;
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;
@@ -532,3 +532,6 @@ $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
 $config['allowed_origins'] = 'http://localhost:3000';
+
+// An empty Docker value selects the browser's own origin; NULL preserves XAMPP URLs.
+$config['socket_io_url'] = getenv('SOCKET_IO_URL') !== FALSE ? getenv('SOCKET_IO_URL') : NULL;

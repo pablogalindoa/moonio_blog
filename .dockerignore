@@ -1,0 +1,11 @@
+# The web image contains infrastructure only; source is a development bind mount.
+# An allowlist prevents credentials, DB dumps, uploads and .git entering builds.
+**
+!docker/
+!docker/php/
+!docker/php/Dockerfile
+!docker/php/php.ini
+!docker/php/entrypoint.sh
+!docker/php/healthcheck.php
+!docker/apache/
+!docker/apache/app.conf

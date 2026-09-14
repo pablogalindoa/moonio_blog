@@ -7,7 +7,7 @@
     const userImage = "<?= base_url($this->session->userdata('profile_picture')); ?>";
 </script>
 <script>
-const socket = io("http://192.168.100.5:3000");
+const socket = io(<?= json_encode($this->config->item('socket_io_url') ?? 'http://192.168.100.5:3000'); ?> || window.location.origin);
 
 let currentChatId = 2;
 let currentRoom = "chat_" + currentChatId;
