@@ -315,13 +315,13 @@ class EmployeeController extends CI_Controller {
             $this->session->set_userdata('phone', $employee->phone);
             $this->session->set_userdata('profile_picture', $employee->profile_picture);
             $this->emp->addPoints($employee->id, 1);
-            redirect(base_url('/index.php/home'));
+            redirect('home');
             $this->session->set_flashdata('status', $employee->first_name);
 
         } else {
 
             $this->session->set_flashdata('status', 'Usuario o Contraseña Inválido');
-            redirect(base_url('/index.php/login'));
+            redirect('login');
 
         }
     
@@ -378,7 +378,7 @@ class EmployeeController extends CI_Controller {
         $this->session->unset_userdata('id');
         $this->session->unset_userdata('first_name');
         $this->session->set_flashdata('status', 'You have been logged out.');
-        redirect(base_url('index.php/login'));
+        redirect('login');
     }
     
 }

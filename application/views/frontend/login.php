@@ -54,7 +54,7 @@
                             </div>
                         <?php endif; ?>
 
-                        <form action="<?= base_url('index.php/employee/loginAuth'); ?>" method="POST">
+                        <form action="<?= site_url('employee/loginAuth'); ?>" method="POST">
 
                             <div class="form-group mb-3">
                                 <label class="font-semibold text-blue-900">

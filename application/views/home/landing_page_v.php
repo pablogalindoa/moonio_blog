@@ -1,4 +1,5 @@
-<div class="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-purple-200">
+<?php $landingLoggedIn = (bool)$this->session->userdata('id'); ?>
+<div class="moon-landing min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-purple-200">
 
     <!-- Navbar -->
     <div class="flex justify-between items-center px-12 py-6">
@@ -9,8 +10,8 @@
         <div class="flex gap-6 items-center">
             <a href="#" class="text-purple-600 hover:text-purple-800">Características</a>
             <a href="#" class="text-purple-600 hover:text-purple-800">Precios</a>
-            <a href="<?= base_url('index.php/login') ?>" class="bg-purple-400 hover:bg-purple-500 text-white px-6 py-2 rounded-full shadow-md transition">
-                Iniciar Sesión
+            <a href="<?= site_url($landingLoggedIn ? 'home' : 'login'); ?>" class="bg-purple-400 hover:bg-purple-500 text-white px-6 py-2 rounded-full shadow-md transition">
+                <?= $landingLoggedIn ? 'Ir al Dashboard' : 'Iniciar Sesión'; ?>
             </a>
         </div>
     </div>

@@ -66,6 +66,8 @@ async function loadChats() {
         const button = document.createElement('button'); button.className = 'chat-action';
         const name = chat.type === 'grupo' ? chat.name : chat.first_name + ' ' + chat.last_name;
         button.textContent = name;
+        button.dataset.chatId = chat.id_chats;
+        button.setAttribute('aria-pressed', String(Number(chat.id_chats) === currentChatId));
         button.onclick = () => openChat(Number(chat.id_chats), name, BASE_URL + (chat.profile_picture || ''), chat.other_user_id);
         list.append(button);
     });
@@ -73,6 +75,7 @@ async function loadChats() {
 function openChat(chatId, name, image, peerId) {
     if (currentRoom) socket.emit('leave_room', currentRoom);
     currentChatId = chatId; currentRoom = 'chat_' + chatId; currentPeerId = peerId;
+    document.querySelectorAll('#chatList button').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.chatId) === chatId)));
     visibleMessages.clear(); document.getElementById('chat').replaceChildren();
     document.getElementById('chatTitle').textContent = name;
     document.getElementById('chatAvatar').src = image;
@@ -110,20 +113,17 @@ async function shareFile(input) {
 }
 window.addEventListener('DOMContentLoaded', () => {
     loadChats().catch(e=>notice(e.message));
+    document.querySelectorAll('.moon-call-preview video').forEach(video => {
+        video.addEventListener('loadedmetadata', () => video.classList.add('has-media'));
+        video.addEventListener('emptied', () => video.classList.remove('has-media'));
+    });
     document.getElementById('message').addEventListener('keydown', e=>{if(e.key==='Enter') sendMessage();});
 });
 </script>
-<style>
-.chat-action { background:#302052; color:#eee; border:1px solid #6753a0; border-radius:10px; padding:10px 14px; cursor:pointer; }
-.chat-message { background:#202c49; color:#fff; padding:12px; margin:10px 0; border-radius:14px; max-width:85%; overflow-wrap:anywhere; white-space:pre-wrap; }
-.chat-message.mine { background:#493178; margin-left:auto; }
-.chat-message a { color:#a9d8ff; text-decoration:underline; }
-#chat { max-height:55vh; overflow:auto; }
-@media(max-width:700px) { .chat-shell { flex-direction:column; } .chat-sidebar { width:100%; max-height:190px; overflow:auto; } }
-</style>
 
 
-<div class="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-950 to-slate-800 p-6 text-white">
+
+<div class="moon-chat-page min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-950 to-slate-800 p-6 text-white">
 
     <!-- Chat Container -->
     <div class="w-full max-w-7xl mx-auto bg-slate-900/80 backdrop-blur-lg rounded-3xl shadow-2xl flex chat-shell overflow-hidden border border-purple-700 relative">
@@ -154,10 +154,10 @@ window.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <!-- Chat Area -->
-        <div class="flex-1 flex flex-col">
+        <div class="moon-chat-main flex-1 flex flex-col">
 
             <!-- Chat Header -->
-            <div class="p-6 border-b border-purple-700 flex justify-between items-center bg-slate-900">
+            <div class="moon-chat-header p-6 border-b border-purple-700 flex justify-between items-center bg-slate-900">
                 <div class="flex items-center gap-3">
                     <img id="chatAvatar" class="w-10 h-10 rounded-full object-cover border border-yellow-400">
 
@@ -167,15 +167,15 @@ window.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <div class="flex flex-wrap gap-2">
-                    <button class="chat-action" onclick="startCall().catch(e=>{notice(e.message); endCall();})">📹 Videollamada</button>
-                    <button class="chat-action" onclick="shareLocation()">📍 Ubicación</button>
-                    <button class="chat-action" onclick="pickFile()">📎 Archivo</button>
-                    <button class="chat-action" onclick="endCall()">Colgar</button>
+                <div class="moon-chat-actions flex flex-wrap gap-2">
+                    <button class="chat-action" onclick="startCall().catch(e=>{notice(e.message); endCall();})"><span class="moon-icon" aria-hidden="true">📹</span> Videollamada</button>
+                    <button class="chat-action" onclick="shareLocation()"><span class="moon-icon" aria-hidden="true">📍</span> Ubicación</button>
+                    <button class="chat-action" onclick="pickFile()"><span class="moon-icon" aria-hidden="true">📎</span> Archivo</button>
+                    <button class="chat-action chat-hangup" onclick="endCall()">Colgar</button>
                     <input id="chatFile" type="file" hidden onchange="shareFile(this)">
                 </div>
             </div>
-            <div class="fixed bottom-4 right-4 flex gap-4">
+            <div class="moon-call-preview fixed bottom-4 right-4 flex gap-4">
                 <video id="localVideo" autoplay playsinline muted class="w-40 rounded-lg border"></video>
                 <video id="remoteVideo" autoplay playsinline class="w-40 rounded-lg border"></video>
             </div>
@@ -190,7 +190,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             <!-- Message Input -->
 
-            <div class="p-6 border-t border-purple-700 bg-slate-950">
+            <div class="moon-chat-composer p-6 border-t border-purple-700 bg-slate-950">
                 <div class="flex items-center gap-4 bg-slate-800 px-4 py-3 rounded-full border border-purple-700 shadow-inner">
 
                     <button class="text-green-400 text-xl">➕</button>

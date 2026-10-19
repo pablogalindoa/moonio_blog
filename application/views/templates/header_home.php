@@ -22,62 +22,58 @@
       $message['message'] = '';
       $message['login'] = FALSE; 
     ?>
-  <?php if ($this->session->userdata('id')): ?>
-
-    <div class="bg-slate-800 border border-green-700 rounded-2xl p-4 mb-6">
-
-        <div class="flex justify-between items-center flex-wrap gap-4">
-
-            <div>
-                <h3 class="text-xl font-bold text-yellow-400">
-                    ✦ MOONIO Collaboration Hub
-                </h3>
-
-                <p class="text-gray-300 text-sm">
-                    Bienvenid@ <?= $this->session->userdata('first_name'); ?>
-                </p>
-                <a href="<?= base_url('index.php/employee/logout'); ?>"
-                    class="no-underline bg-purple-300 text-white py-3 px-3 rounded-lg shadow hover:bg-purple-600 transition duration-300">
-                    Cerrar Sesión
-                </a>
-            </div>
-
-
-            <div class="flex flex-wrap gap-3">
-
-                <a href="<?= base_url('index.php/home') ?>"
-                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    🌑 Dashboard
-                </a>
-
-                <a href="<?= base_url('index.php/chats') ?>"
-                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    💬 Chats
-                </a>
-
-                <a href="<?= base_url('index.php/rewards') ?>"
-                    class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 px-4 py-2 rounded-lg font-semibold">
-                    🌙 Recompensas
-                </a>
-
-                <a href="<?= base_url('index.php/task_manager') ?>"
-                    class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    📋 Administrador de Tareas
-                </a>
-
-                <a href="<?= base_url('index.php/ftp_center') ?>"
-                    class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    📁 Centro de Transferencias
-                </a>
-
-                <a href="<?= base_url('index.php/smtp') ?>"
-                    class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    📧 Centro de Correos
-                </a>
-                <button onclick="sendLocation()"
-                    class="bg-green-500 hover:bg-green-400 text-black px-4 py-2 rounded-lg font-semibold">
-                    📍 Enviar Ubicación
-                </button>
+  <?php if ($this->session->userdata('id')):
+    $currentRoute = $this->uri->segment(1);
+    $navigation = [
+      ['home', 'Dashboard', '◈'], ['chats', 'Chats', '◌'],
+      ['rewards', 'Recompensas', '✧'], ['task_manager', 'Administrador de Tareas', '☷'],
+      ['ftp_center', 'Centro de Transferencias', '↗'], ['smtp', 'Centro de Correos', '✉']
+    ];
+    $displayName = (string)$this->session->userdata('first_name');
+  ?>
+    <header class="moon-topbar">
+      <a class="moon-brand" href="<?= site_url('home'); ?>" aria-label="Moonio — Dashboard">
+        <img src="<?= base_url('assets/img/moonio-mark.svg'); ?>" alt="" width="30" height="30"> <span>Moonio</span>
+      </a>
+      <button class="moon-menu-toggle" type="button" aria-controls="moon-navigation" aria-expanded="false">☰ <span>Menú</span></button>
+      <nav id="moon-navigation" class="moon-navigation" aria-label="Navegación principal">
+        <?php foreach ($navigation as [$route, $label, $icon]): ?>
+          <a class="moon-nav-link" href="<?= site_url($route); ?>" <?= $currentRoute === $route ? 'aria-current="page"' : ''; ?>>
+            <span class="moon-icon" aria-hidden="true"><?= $icon; ?></span><span><?= $label; ?></span>
+          </a>
+        <?php endforeach; ?>
+      </nav>
+      <details class="moon-profile">
+        <summary aria-label="Menú de usuario: <?= html_escape($displayName); ?>">
+          <span class="moon-avatar" aria-hidden="true"><?= html_escape(mb_substr($displayName, 0, 1)); ?></span>
+          <span class="moon-user-name"><?= html_escape($displayName); ?></span><span class="moon-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="moon-profile-menu">
+          <p>Tu espacio de trabajo</p>
+          <strong><?= html_escape($displayName); ?></strong>
+          <button type="button" onclick="sendLocation()">Compartir ubicación</button>
+          <a href="<?= site_url('employee/logout'); ?>">Cerrar Sesión <span aria-hidden="true">↗</span></a>
+        </div>
+      </details>
+    </header>
+    <script>
+      (() => {
+        const header = document.querySelector('.moon-topbar');
+        const toggle = header.querySelector('.moon-menu-toggle');
+        const profile = header.querySelector('.moon-profile');
+        toggle.addEventListener('click', () => {
+          const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+          toggle.setAttribute('aria-expanded', String(expanded));
+          header.classList.toggle('menu-open', expanded);
+        });
+        document.addEventListener('click', event => { if (!profile.contains(event.target)) profile.open = false; });
+        document.addEventListener('keydown', event => {
+          if (event.key !== 'Escape') return;
+          if (profile.open) { profile.open = false; profile.querySelector('summary').focus(); }
+          if (toggle.getAttribute('aria-expanded') === 'true') { toggle.click(); toggle.focus(); }
+        });
+      })();
+    </script>
                 <script>
                   function sendLocation()
                   {
@@ -105,7 +101,7 @@
                                   const data = JSON.parse(text);
 
                                   if (data.status === "ok") {
-                                      alert("Ubicación enviada ⚽");
+                                      alert("Ubicación enviada");
                                   } else {
                                       alert("Error al guardar ubicación: " + data.message);
                                   }
@@ -124,20 +120,9 @@
                       });
                   }
                   </script>
-
-            </div>
-
-        </div>
-
-    </div>
-    <br> 
-    <!-- <a href="<?= base_url('index.php/employee/logout'); ?>" class="text-red-500 float-right">Logout</a> -->
   <?php else: ?>
-    <?php  
-    ?> 
-    <p class="text-gray-700 text-left"; style="margin-right: 30px;">INICIA SESIÓN O REGÍSTRATE :D</p>
-    <div>
-      <a href="<?=base_url('index.php/login');?>" class="no-underline bg-blue-300 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition">Login</a> 
-    </div>
+    <header class="moon-topbar moon-guestbar">
+      <a class="moon-brand" href="<?= site_url('home'); ?>"><img src="<?= base_url('assets/img/moonio-mark.svg'); ?>" alt="" width="30" height="30"> Moonio</a>
+      <a class="moon-nav-link" href="<?= site_url('login'); ?>">Iniciar Sesión</a>
+    </header>
   <?php endif; ?>
-
