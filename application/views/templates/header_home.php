@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/staterestore/1.4.1/css/stateRestore.bootstrap5.css">
 
     <title>M O O N I O</title>
-    <link rel="stylesheet" href="<?= base_url('assets/css/moonio-theme.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/moonio-theme.css') . '?v=' . substr(hash_file('sha256', FCPATH . 'assets/css/moonio-theme.css'), 0, 12); ?>">
   </head>
   <body class="moonio-theme">
     <?php 
@@ -26,8 +26,8 @@
     $currentRoute = $this->uri->segment(1);
     $navigation = [
       ['home', 'Dashboard', '◈'], ['chats', 'Chats', '◌'],
-      ['rewards', 'Recompensas', '✧'], ['task_manager', 'Administrador de Tareas', '☷'],
-      ['ftp_center', 'Centro de Transferencias', '↗'], ['smtp', 'Centro de Correos', '✉']
+      ['rewards', 'Recompensas', '✧'], ['task_manager', 'Tareas', '☷'],
+      ['ftp_center', 'Transferencias', '↗'], ['smtp', 'Correos', '✉']
     ];
     $displayName = (string)$this->session->userdata('first_name');
   ?>

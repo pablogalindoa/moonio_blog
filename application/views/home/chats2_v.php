@@ -113,10 +113,27 @@ async function shareFile(input) {
 }
 window.addEventListener('DOMContentLoaded', () => {
     loadChats().catch(e=>notice(e.message));
-    document.querySelectorAll('.moon-call-preview video').forEach(video => {
-        video.addEventListener('loadedmetadata', () => video.classList.add('has-media'));
-        video.addEventListener('emptied', () => video.classList.remove('has-media'));
+    const preview = document.querySelector('.moon-call-preview');
+    const videos = [...preview.querySelectorAll('video')];
+    function updatePreviewVisibility() {
+        videos.forEach(video => {
+            const active = Boolean(video.srcObject && video.readyState >= 1 &&
+                video.srcObject.getVideoTracks().some(track => track.readyState === 'live'));
+            video.hidden = !active;
+            video.style.display = active ? 'block' : 'none';
+        });
+        const active = videos.some(video => !video.hidden);
+        preview.hidden = !active;
+        preview.style.display = active ? 'flex' : 'none';
+    }
+    videos.forEach(video => {
+        video.addEventListener('loadedmetadata', () => {
+            video.srcObject?.getVideoTracks().forEach(track => track.addEventListener('ended', updatePreviewVisibility, {once:true}));
+            updatePreviewVisibility();
+        });
+        video.addEventListener('emptied', updatePreviewVisibility);
     });
+    updatePreviewVisibility();
     document.getElementById('message').addEventListener('keydown', e=>{if(e.key==='Enter') sendMessage();});
 });
 </script>
@@ -175,9 +192,9 @@ window.addEventListener('DOMContentLoaded', () => {
                     <input id="chatFile" type="file" hidden onchange="shareFile(this)">
                 </div>
             </div>
-            <div class="moon-call-preview fixed bottom-4 right-4 flex gap-4">
-                <video id="localVideo" autoplay playsinline muted class="w-40 rounded-lg border"></video>
-                <video id="remoteVideo" autoplay playsinline class="w-40 rounded-lg border"></video>
+            <div class="moon-call-preview fixed bottom-4 right-4 gap-4" hidden style="display:none">
+                <video id="localVideo" hidden style="display:none" autoplay playsinline muted class="w-40 rounded-lg border"></video>
+                <video id="remoteVideo" hidden style="display:none" autoplay playsinline class="w-40 rounded-lg border"></video>
             </div>
 
 
