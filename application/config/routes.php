@@ -108,6 +108,7 @@ $route['blog/worldcup/(:any)'] = 'BlogController/worldcup/$1';
 $route['blog/blog_admin/(:any)'] = 'BlogController/blogAdmin/$1';
 $route['home'] = 'HomeController/index';
 $route['rewards'] = 'HomeController/rewards';
+$route['chats'] = 'HomeController/chats';
 // Tareas
 $route['task_manager'] = 'TaskController/index';
 $route['tasks/create'] = 'TaskController/create';
@@ -144,7 +145,6 @@ $route['mundiales/store'] = 'MundialesAdmin/store';
 $route['mundiales/(:num)'] = 'MundialesAdmin/view/$1';
 
 $route['blog/add_comment'] = 'BlogController/addComment';
-
 $route['api/create_chat'] = 'ChatController/create_chat';
 $route['api/save_message'] = 'ChatController/save_message';
 $route['api/messages/(:num)'] = 'ChatController/get_messages/$1';

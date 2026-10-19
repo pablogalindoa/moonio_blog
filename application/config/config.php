@@ -24,6 +24,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['base_url'] = getenv('APP_BASE_URL') ?: 'http://localhost/blog/';
+// Development LAN links stay on the browser's origin.
+if (getenv('APP_LAN_MODE') === '1') {
+    $config['base_url'] = '/blog/';
+}
 
 /*
 |--------------------------------------------------------------------------

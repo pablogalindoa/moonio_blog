@@ -9,7 +9,7 @@
         <div class="flex gap-6 items-center">
             <a href="#" class="text-purple-600 hover:text-purple-800">Características</a>
             <a href="#" class="text-purple-600 hover:text-purple-800">Precios</a>
-            <a href="#" class="bg-purple-400 hover:bg-purple-500 text-white px-6 py-2 rounded-full shadow-md transition">
+            <a href="<?= base_url('index.php/login') ?>" class="bg-purple-400 hover:bg-purple-500 text-white px-6 py-2 rounded-full shadow-md transition">
                 Iniciar Sesión
             </a>
         </div>

@@ -15,8 +15,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/staterestore/1.4.1/css/stateRestore.bootstrap5.css">
 
     <title>M O O N I O</title>
+    <link rel="stylesheet" href="<?= base_url('assets/css/moonio-theme.css'); ?>">
   </head>
-  <body>
+  <body class="moonio-theme">
     <?php 
       $message['message'] = '';
       $message['login'] = FALSE; 
@@ -29,29 +30,39 @@
 
             <div>
                 <h3 class="text-xl font-bold text-yellow-400">
-                    ⚽ FIFA Collaboration Hub
+                    ✦ MOONIO Collaboration Hub
                 </h3>
 
                 <p class="text-gray-300 text-sm">
-                    Bienvenido <?= $this->session->userdata('first_name'); ?>
+                    Bienvenid@ <?= $this->session->userdata('first_name'); ?>
                 </p>
+                <a href="<?= base_url('index.php/employee/logout'); ?>"
+                    class="no-underline bg-purple-300 text-white py-3 px-3 rounded-lg shadow hover:bg-purple-600 transition duration-300">
+                    Cerrar Sesión
+                </a>
             </div>
+
 
             <div class="flex flex-wrap gap-3">
 
                 <a href="<?= base_url('index.php/home') ?>"
+                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
+                    🌑 Dashboard
+                </a>
+
+                <a href="<?= base_url('index.php/chats') ?>"
                     class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold">
                     💬 Chats
                 </a>
 
                 <a href="<?= base_url('index.php/rewards') ?>"
                     class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 px-4 py-2 rounded-lg font-semibold">
-                    🏆 Recompensas
+                    🌙 Recompensas
                 </a>
 
                 <a href="<?= base_url('index.php/task_manager') ?>"
                     class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    📋 Tablero táctico
+                    📋 Administrador de Tareas
                 </a>
 
                 <a href="<?= base_url('index.php/ftp_center') ?>"

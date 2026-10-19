@@ -19,7 +19,7 @@ class HomeController extends CI_Controller {
         $employee = $this->emp->getEmployee();
 
         $this->load->view('templates/header_home');
-        $this->load->view('home/chats_fifa_v', ['worldCups' => $worldCups]);
+        $this->load->view('home/landing_page_v', ['worldCups' => $worldCups]);
         $this->load->view('templates/footer');
     }
 
@@ -103,6 +103,13 @@ class HomeController extends CI_Controller {
     
         $this->load->view('templates/header_blog');
         $this->load->view('blogs/blog_search', ['blogs' => $blogs, 'categories' => $categories]);
+        $this->load->view('templates/footer');
+    }
+
+    public function chats(){
+        $id = $this->session->userdata('id');
+        $this->load->view('templates/header_home');
+        $this->load->view('home/chats2_v');
         $this->load->view('templates/footer');
     }
 

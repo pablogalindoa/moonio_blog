@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Moonio">
+  <defs>
+    <radialGradient id="sky"><stop stop-color="#242354"/><stop offset="1" stop-color="#070B1A"/></radialGradient>
+    <linearGradient id="moon" x2="1" y2="1"><stop stop-color="#4DA3FF"/><stop offset=".55" stop-color="#8F6BFF"/><stop offset="1" stop-color="#6C4CF1"/></linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="79" fill="url(#sky)" stroke="#2A315F"/>
+  <g fill="#B8C2E0"><circle cx="35" cy="38" r="1.2"/><circle cx="121" cy="44" r="1.5"/><circle cx="130" cy="101" r="1"/><circle cx="39" cy="113" r="1"/></g>
+  <circle cx="80" cy="72" r="29" fill="url(#moon)"/>
+  <path d="M96 48a29 29 0 0 1-36 44 29 29 0 0 0 36-44" fill="#101935" opacity=".5"/>
+  <ellipse cx="80" cy="75" rx="49" ry="13" transform="rotate(-28 80 75)" fill="none" stroke="#B8C2E0" stroke-width="1.5"/>
+  <text x="80" y="132" text-anchor="middle" fill="#F5F7FF" font-family="Arial,sans-serif" font-size="12" letter-spacing="4">MOONIO</text>
+</svg>

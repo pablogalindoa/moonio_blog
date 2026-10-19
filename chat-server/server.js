@@ -23,10 +23,12 @@ io.on("connection", (socket) => {
 	console.log("User connected:", socket.id);
 
 	socket.on("join_room", (room) => {
-		socket.join(room);
+		if (/^chat_\d+$/.test(room)) socket.join(room);
 	});
 
-	socket.on("send_message", async (data) => {
+	socket.on("leave_room", room => socket.leave(room));
+
+	socket.on("send_message", async (data, ack = () => {}) => {
 		try {
 			console.log("📨 Incoming message:", data);
 
@@ -49,18 +51,23 @@ io.on("connection", (socket) => {
 
 			console.log("📡 STATUS:", response.status);
 
-			const result = await response.text();
+			const result = await response.json();
+            if (!response.ok || result.status !== "ok") throw new Error("Persistence failed");
+            data.id_messages = result.id_messages;
 			console.log("✅ API RESPONSE:", result);
 
 			// 🔥 Emitir mensaje SOLO si se guardó
-			io.to(data.room).emit("receive_message", data);
+			io.to("chat_" + Number(data.chat_id)).emit("receive_message", data);
+            ack({status: "ok", id_messages: result.id_messages});
 		} catch (err) {
-			console.error("❌ ERROR saving message:", err);
+			console.error("ERROR saving message:", err);
+            ack({status: "error", message: "No se pudo guardar el mensaje."});
 		}
 	});
 
 	socket.on("disconnect", () => {
-		console.log("User disconnected:", socket.id);
+		for (const id of Object.keys(users)) if (users[id] === socket.id) delete users[id];
+        console.log("User disconnected:", socket.id);
 	});
 
 	socket.on("call_user", (data) => {
@@ -99,7 +106,7 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("end_call", (data) => {
-		io.to(data.to).emit("end_call");
+		if (users[data.to]) io.to(users[data.to]).emit("end_call");
 	});
 	socket.on("register_user", (userId) => {
 		users[userId] = socket.id;

@@ -77,14 +77,22 @@ class ChatController extends CI_Controller {
 
         $this->load->model("ChatModel");
 
-        $this->ChatModel->insertMessage([
-            'id_chats' => $data['chat_id'],
-            'id_employee' => $data['user_id'],
-            'message' => $data['message']
+        $chatId = (int)($data['chat_id'] ?? 0);
+        $userId = (int)($data['user_id'] ?? 0);
+        $message = trim((string)($data['message'] ?? ''));
+        $member = $this->db->where('id_chats', $chatId)->where('id_employee', $userId)->count_all_results('chat_participants');
+        if (!$member || $message === '' || strlen($message) > 60000) {
+            $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Mensaje o participante inválido']));
+            return;
+        }
+        $saved = $this->ChatModel->insertMessage([
+            'id_chats' => $chatId, 'id_employee' => $userId, 'message' => $message
         ]);
-
-        echo json_encode(["status" => "ok"]);
+        $this->output->set_status_header($saved ? 200 : 500)->set_content_type('application/json')->set_output(json_encode([
+            'status' => $saved ? 'ok' : 'error', 'id_messages' => $saved ? $this->db->insert_id() : null
+        ]));
     }
+
 
     // GET MESSAGES
     public function get_messages($chat_id) {
