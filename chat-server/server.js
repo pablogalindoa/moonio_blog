@@ -71,7 +71,7 @@ io.on("connection", (socket) => {
 			if (!response.ok || result.status !== "ok")
 				throw new Error("Persistence failed");
 			data = {chat_id:Number(data.chat_id), id_messages:result.id_messages, message:result.message,
-                user_id:result.user_id, user_name:result.user_name, is_encrypted:result.is_encrypted};
+                user_id:result.user_id, user_name:result.user_name, profile_picture:result.profile_picture, is_encrypted:result.is_encrypted};
 
 
 			// Emitir mensaje SOLO si se guardó

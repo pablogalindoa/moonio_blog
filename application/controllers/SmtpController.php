@@ -18,10 +18,15 @@ class SmtpController extends CI_Controller
         $this->load->view('templates/footer');
     }
 
+    private function feedback($type, $message) {
+        $this->session->set_flashdata('email_feedback', ['type'=>$type, 'message'=>$message]);
+        redirect('smtp', 'location', 303);
+    }
+
     public function send()
     {
         $to = $this->input->post('to');
-        if (!$this->db->where('email', $to)->where('enable',1)->count_all_results('employee')) { show_error('Selecciona el correo de un usuario registrado.', 400); return; }
+        if (!$this->db->where('email', $to)->where('enable',1)->count_all_results('employee')) { $this->feedback('error', 'Selecciona el correo de un usuario registrado.'); return; }
         $subject = $this->input->post('subject');
         $message = $this->input->post('message');
 
@@ -66,11 +71,11 @@ class SmtpController extends CI_Controller
 
             $this->smtp->saveEmailLog($data);
 
-            echo "Correo enviado correctamente";
+            $this->feedback('success', 'Correo enviado correctamente');
         }
         else
         {
-            show_error('No se pudo enviar el correo. Revisa la configuración SMTP y la conexión del servidor.', 502);
+            $this->feedback('error', 'No se pudo enviar el correo. Inténtalo de nuevo en unos momentos.');
         }
     }
 }

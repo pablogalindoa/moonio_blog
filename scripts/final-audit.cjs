@@ -54,7 +54,7 @@ async function api(page, path, data) {
  await a.locator(`#usersList input[value="${B.id}"]`).check();await a.locator(`#usersList input[value="${C.id}"]`).check();
  const groupName='Final audit '+Date.now();await a.locator('#groupName').fill(groupName);
  await a.locator('#groupModal').getByRole('button',{name:'Nueva conversación',exact:true}).click();
- await b.getByRole('button',{name:groupName,exact:true}).waitFor();await c.getByRole('button',{name:groupName,exact:true}).waitFor();
+ await b.locator('#chatList button').filter({hasText:groupName}).waitFor();await c.locator('#chatList button').filter({hasText:groupName}).waitFor();
  const chats=(await api(a,'api/user_chats/'+A.id)).body;const group=Number(chats.find(x=>x.name===groupName).id_chats);
  const priv=(await create(a,'privado','',[B.id])).body.chat_id;
  fixtures.group=Number(group);fixtures.private=Number(priv);fs.writeFileSync(fixturePath,JSON.stringify(fixtures),{mode:0o600});
@@ -113,7 +113,7 @@ async function api(page, path, data) {
  assert.ok(taskId);await a.goto(base+'tasks/advance/'+taskId);await a.goto(base+'tasks/advance/'+taskId);fixtures.task=Number(taskId);fs.writeFileSync(fixturePath,JSON.stringify(fixtures),{mode:0o600});
  assert.equal((await api(a,'tasks/store',{id_chats:group,assigned_to:D.id,title:'invalid',status:'bench',priority:'regular'})).status,400);pass('Group task UI restricts assignee to members; create and advance twice; outsider assignment rejected');
  for(const p of [a,b]){await p.goto(base+'rewards');await p.getByText('Clasificación de todos los usuarios',{exact:true}).waitFor();assert.match(await p.locator('body').innerText(),/Alpha Finalaudit/);}pass('Rewards and shared ranking visible from two independent user accounts');
- await a.goto(base+'smtp');assert.ok(await a.locator('select[name=to] option').count()>1);assert.equal((await api(a,'smtp/send',{to:'notregistered@example.com',subject:'audit',message:'audit'})).status,400);pass('Email selector lists registered users; arbitrary recipient rejected (no external email sent)');
+ await a.goto(base+'smtp');assert.ok(await a.locator('select[name=to] option').count()>1);const rejectedEmail=await api(a,'smtp/send',{to:'notregistered@example.com',subject:'audit',message:'audit'});assert.equal(rejectedEmail.status,200);assert.match(rejectedEmail.text,/moon-feedback-error/);pass('Email selector lists registered users; arbitrary recipient rejected (no external email sent)');
  assert.deepEqual(errors,[]);pass('No browser JavaScript exceptions');
  console.log(JSON.stringify({passed:results.length,group:fixtures.group,private:fixtures.private,task:fixtures.task,users:fixtures.users.map(u=>u.id)},null,2));
  }finally{await browser.close();}

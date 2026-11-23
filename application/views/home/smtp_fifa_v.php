@@ -1,3 +1,21 @@
+<link rel="stylesheet" href="<?= base_url('assets/css/moonio-chat-polish.css') ?>">
+<?php $feedback = $this->session->flashdata('email_feedback'); ?>
+<?php if (is_array($feedback)): ?>
+<div class="moon-feedback <?= $feedback['type'] === 'success' ? 'moon-feedback-success' : 'moon-feedback-error' ?>"
+     role="<?= $feedback['type'] === 'success' ? 'status' : 'alert' ?>" aria-atomic="true">
+    <span class="moon-feedback-icon" aria-hidden="true"><?= $feedback['type'] === 'success' ? '✓' : '!' ?></span>
+    <span><?= html_escape($feedback['message']) ?></span>
+</div>
+<script>
+(() => {
+    const toast = document.querySelector('.moon-feedback');
+    setTimeout(() => {
+        toast.classList.add('moon-feedback-leaving');
+        setTimeout(() => toast.remove(), 300);
+    }, 3600);
+})();
+</script>
+<?php endif; ?>
 <div class="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 p-8">
 
     <div class="max-w-4xl mx-auto">

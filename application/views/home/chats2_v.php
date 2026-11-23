@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="<?= base_url('assets/css/moonio-chat-polish.css') ?>">
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const BASE_URL = <?= json_encode(base_url()); ?>;
@@ -8,6 +9,29 @@ const socket = io(window.location.origin);
 let currentChatId = null, currentRoom = null, pendingSend = false;
 const visibleMessages = new Set();
 let onlineUsers = new Set();
+const chatTypes = new Map();
+let currentChatIsGroup = false;
+function avatar(path, name, group = false) {
+    const node = document.createElement('span'); node.className = 'moon-avatar'; node.title = name || '';
+    const initials = document.createElement('span'); initials.setAttribute('aria-hidden', 'true');
+    initials.textContent = (name || 'M').trim().split(/\s+/).slice(0,2).map(word=>word[0]).join('').toUpperCase();
+    node.append(initials);
+    if (path || group) {
+        const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy';
+        img.src = path ? new URL(path, new URL(BASE_URL, location.origin)).href : BASE_URL + 'assets/img/moonio-group.svg';
+        img.onerror = () => { img.remove(); };
+        node.append(img);
+    }
+    return node;
+}
+function conversationAvatar(chat, name) {
+    if (chat.type !== 'grupo' || chat.profile_picture) return avatar(chat.profile_picture, name);
+    const members = chat.avatar_members || [];
+    if (!members.length) return avatar(null, name, true);
+    const stack = document.createElement('span'); stack.className = 'moon-avatar-stack'; stack.setAttribute('aria-hidden', 'true');
+    members.slice(0,3).forEach(member => stack.append(avatar(member.profile_picture, member.first_name + ' ' + member.last_name)));
+    return stack;
+}
 function updatePresence() {
     document.querySelectorAll('[data-peer-id]').forEach(node => {
         node.textContent = onlineUsers.has(Number(node.dataset.peerId)) ? ' ● En línea' : ' ○ Desconectado';
@@ -29,7 +53,13 @@ function renderMessage(msg) {
     visibleMessages.add(id);
     const box = document.createElement('div');
     box.dataset.messageId = id;
+    box.dataset.senderId = String(msg.id_employee ?? msg.user_id);
     box.className = 'chat-message ' + (Number(msg.id_employee ?? msg.user_id) === userId ? 'mine' : '');
+    if (currentChatIsGroup) {
+        box.classList.add('moon-group-message');
+        const photo = avatar(msg.profile_picture, msg.first_name ?? msg.user_name ?? '');
+        photo.classList.add('moon-message-avatar'); box.append(photo);
+    }
     const name = document.createElement('small');
     name.textContent = (msg.first_name ?? msg.user_name ?? '') + (Number(msg.is_encrypted) ? ' 🔒 Cifrado' : '');
     box.append(name, document.createElement('br'));
@@ -42,6 +72,11 @@ function renderMessage(msg) {
     }
     const chat = document.getElementById('chat'); chat.append(box);
     [...chat.children].sort((a,b)=>Number(a.dataset.messageId)-Number(b.dataset.messageId)).forEach(node=>chat.append(node));
+    let previousSender = null;
+    [...chat.children].forEach(message => {
+        message.classList.toggle('moon-consecutive-message', message.dataset.senderId === previousSender);
+        previousSender = message.dataset.senderId;
+    });
     box.scrollIntoView({block:'nearest'});
 }
 async function sendText(message, chatId = currentChatId) {
@@ -89,28 +124,38 @@ async function loadChats() {
     chats.forEach(chat => {
         const button = document.createElement('button'); button.className = 'chat-action';
         const name = chat.type === 'grupo' ? chat.name : chat.first_name + ' ' + chat.last_name;
-        button.textContent = name;
+        chatTypes.set(Number(chat.id_chats), chat.type);
+        button.classList.add('moon-conversation');
+        button.append(conversationAvatar(chat, name));
+        const details = document.createElement('span'); details.className = 'moon-conversation-details';
+        const label = document.createElement('span'); label.className = 'moon-conversation-name'; label.textContent = name; label.title = name;
+        details.append(label); button.append(details);
         if (chat.other_user_id) {
-            const presence = document.createElement('small'); presence.dataset.peerId = chat.other_user_id; button.append(presence);
+            const presence = document.createElement('small'); presence.dataset.peerId = chat.other_user_id; presence.className = 'moon-presence'; details.append(presence);
         }
+        if (chat.type === 'grupo') { const label = document.createElement('small'); label.className = 'moon-conversation-kind'; label.textContent = 'Grupo'; details.append(label); }
         if (chat.unread_count > 0) {
             const badge = document.createElement('strong'); badge.className = 'unread-badge';
-            badge.textContent = ` (${chat.unread_count} sin leer)`; button.append(badge);
+            badge.textContent = chat.unread_count > 99 ? '99+' : chat.unread_count; badge.setAttribute('aria-label', `${chat.unread_count} mensajes sin leer`); button.append(badge);
         }
         button.dataset.chatId = chat.id_chats;
         button.setAttribute('aria-pressed', String(Number(chat.id_chats) === currentChatId));
-        button.onclick = () => openChat(Number(chat.id_chats), name, BASE_URL + (chat.profile_picture || ''), chat.other_user_id);
+        button.onclick = () => openChat(Number(chat.id_chats), name, BASE_URL + (chat.profile_picture || ''), chat.other_user_id, chat.type);
         list.append(button);
     });
     updatePresence();
 }
-function openChat(chatId, name, image, peerId) {
+function openChat(chatId, name, image, peerId, type = chatTypes.get(Number(chatId))) {
+    currentChatIsGroup = type === 'grupo';
     if (currentRoom) socket.emit('leave_room', currentRoom);
     currentChatId = chatId; currentRoom = 'chat_' + chatId; currentPeerId = peerId;
     document.querySelectorAll('#chatList button').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.chatId) === chatId)));
     visibleMessages.clear(); document.getElementById('chat').replaceChildren();
     document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatAvatar').src = image;
+    const headerAvatar = document.getElementById('chatAvatar');
+    const fallbackAvatar = BASE_URL + 'assets/img/' + (currentChatIsGroup ? 'moonio-group.svg' : 'moonio-mark.svg');
+    headerAvatar.onerror = () => { headerAvatar.onerror = null; headerAvatar.src = fallbackAvatar; };
+    headerAvatar.src = image && image !== BASE_URL ? image : fallbackAvatar;
     socket.emit('join_room', currentRoom);
     updatePresence();
     loadMessages(chatId).catch(e=>notice(e.message));

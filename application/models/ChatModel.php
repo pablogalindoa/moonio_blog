@@ -126,6 +126,12 @@ class ChatModel extends CI_Model {
         });
 
         foreach ($allChats as $chat) {
+            if ($chat->type === 'grupo' && !$chat->profile_picture) {
+                // Only the small preview needed by the sidebar, for this member's chats.
+                $chat->avatar_members = $this->db->select('e.first_name,e.last_name,e.profile_picture')
+                    ->from('chat_participants cp')->join('employee e', 'e.id=cp.id_employee')
+                    ->where('cp.id_chats', (int)$chat->id_chats)->order_by('e.id', 'ASC')->limit(3)->get()->result();
+            }
             $row = $this->db->query('SELECT COUNT(*) AS unread_count FROM messages m JOIN chat_participants cp ON cp.id_chats=m.id_chats WHERE cp.id_employee=? AND m.id_chats=? AND m.id_employee<>? AND m.id_messages>cp.last_read_message_id', [(int)$user_id, (int)$chat->id_chats, (int)$user_id])->row();
             $chat->unread_count = (int)$row->unread_count;
             // Do not expose encrypted storage envelopes in sidebar previews.

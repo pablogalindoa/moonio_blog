@@ -1,0 +1,41 @@
+/* Scoped delivery polish; the existing Moonio theme stays unchanged. */
+.moonio-theme #chatList .moon-conversation {
+    display: flex; align-items: center; gap: 10px; min-width: 0; width: 100%;
+    padding: 10px 8px; flex-wrap: nowrap;
+}
+.moon-avatar { position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; flex: 0 0 34px; overflow: hidden; border-radius: 50%;
+    background: linear-gradient(135deg, #514081, #294a70); border: 1px solid #8b79b4;
+    color: #f4efff; font-size: 11px; font-weight: 700; vertical-align: middle;
+}
+.moon-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.moon-conversation > .moon-avatar, .moon-avatar-stack { margin-right: 4px; }
+.moon-avatar-stack { display: flex; align-items: center; width: 48px; flex: 0 0 48px; }
+.moon-avatar-stack .moon-avatar { width: 26px; height: 26px; flex-basis: 26px; border: 2px solid #191b32; font-size: 9px; }
+.moon-avatar-stack .moon-avatar + .moon-avatar { margin-left: -15px; }
+.moon-conversation-details { display: flex; flex: 1 1 0; min-width: 0; flex-direction: column; gap: 3px; }
+.moon-conversation-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; line-height: 1.4; }
+.moon-presence, #peerStatus { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+.moon-presence, .moon-conversation-kind { display: inline-flex; align-items: center; gap: 4px; color: #c3bdd9; font-size: 11px; line-height: 1.4; }
+.moon-conversation .unread-badge { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: #8062c5; color: #fff; font-size: 11px; white-space: nowrap;
+}
+.moonio-theme #chat .moon-group-message { position: relative; margin-left: 42px; max-width: calc(100% - 84px); }
+.moonio-theme #chat .moon-group-message.mine { margin-left: auto; margin-right: 42px; }
+.moon-message-avatar { position: absolute; left: -42px; top: 2px; }
+.mine .moon-message-avatar { left: auto; right: -42px; }
+.moon-consecutive-message .moon-message-avatar { visibility: hidden; }
+.moonio-theme #chat .moon-group-message.moon-consecutive-message { margin-top: 5px; }
+.moon-feedback { position: fixed; top: 84px; right: 24px; z-index: 10000; display: flex; align-items: center; gap: 12px;
+    max-width: min(420px, calc(100vw - 32px)); padding: 16px 20px; border-radius: 16px;
+    background: linear-gradient(120deg, #302249, #182d49); color: #f5f2ff; border: 1px solid #8c72bb;
+    box-shadow: 0 12px 36px #07041466; font-size: 15px; line-height: 1.5;
+    animation: moon-feedback-in 240ms ease-out both; transition: opacity 260ms ease, transform 260ms ease;
+}
+.moon-feedback-icon { display: grid; place-items: center; flex: 0 0 28px; height: 28px; border-radius: 50%; background: #6877bb44; color: #c0f6e5; font-weight: bold; }
+.moon-feedback-error { border-color: #b675a2; }
+.moon-feedback-error .moon-feedback-icon { color: #ffd4e3; background: #b65e8d33; }
+.moon-feedback.moon-feedback-leaving { animation: none; opacity: 0; transform: translateY(-10px); }
+@keyframes moon-feedback-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 700px) { .moon-feedback { top: 76px; right: 16px; } }
+@media (prefers-reduced-motion: reduce) { .moon-feedback { animation: none; transition: none; } }

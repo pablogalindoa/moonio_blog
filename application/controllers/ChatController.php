@@ -88,7 +88,7 @@ class ChatController extends CI_Controller {
         $participants = $this->db->select('id_employee')->where('id_chats', $chatId)->get('chat_participants')->result();
         return $this->json(['status'=>$saved ? 'ok' : 'error', 'id_messages'=>$messageId,
             'message'=>$message, 'user_id'=>$userId, 'user_name'=>$this->session->userdata('first_name'),
-            'is_encrypted'=>(int)$encrypted,
+            'is_encrypted'=>(int)$encrypted, 'profile_picture'=>$this->session->userdata('profile_picture'),
             'participants'=>array_map(function($p){return (int)$p->id_employee;}, $participants)], $saved ? 200 : 500);
     }
 
