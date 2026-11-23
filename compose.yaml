@@ -47,6 +47,9 @@ services:
     ports:
       - "0.0.0.0:${WEB_PORT:-8080}:80"
     environment:
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:-}
       CI_ENV: development
       APP_LAN_MODE: "1"
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080/blog/}

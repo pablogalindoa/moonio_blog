@@ -28,7 +28,7 @@ class FileTransferController extends CI_Controller
             return;
         }
         $config['upload_path'] = './uploads/';
-        $config['allowed_types'] = $chatUpload ? 'pdf|txt|csv|zip|jpg|jpeg|png|gif|webp|doc|docx|xls|xlsx|ppt|pptx|mp3|mp4' : '*';
+        $config['allowed_types'] = $chatUpload ? 'pdf|txt|csv|zip|jpg|jpeg|png|gif|webp|doc|docx|xls|xlsx|ppt|pptx|mp3|mp4|wav|ogg' : '*';
         $config['encrypt_name'] = $chatUpload;
         $config['max_size'] = 20480; // 20 MB
 

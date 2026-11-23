@@ -24,6 +24,8 @@ class HomeController extends CI_Controller {
     }
 
 
+
+
     public function checkSession() {
         if ($this->session->userdata('id')) { // Use 'id', not 'user_id'
             echo "User ID: " . $this->session->userdata('id');
@@ -107,6 +109,7 @@ class HomeController extends CI_Controller {
     }
 
     public function chats(){
+        if (!$this->session->userdata('id')) { redirect('login'); return; }
         $id = $this->session->userdata('id');
         $this->load->view('templates/header_home');
         $this->load->view('home/chats2_v');
@@ -115,6 +118,8 @@ class HomeController extends CI_Controller {
 
     public function rewards()
     {
+        if (!$this->session->userdata('id')) { redirect('login'); return; }
+        $data['ranking'] = $this->db->select('first_name,last_name,points')->where('enable',1)->order_by('points','DESC')->get('employee')->result();
         $id = $this->session->userdata('id');
         $data['employee'] = $this->emp->getAllEmployeeInfo($id);
         $data['trophies'] = $this->emp->getTrophies($id);
@@ -131,7 +136,7 @@ class HomeController extends CI_Controller {
         $data['trophies'] = $this->emp->getTrophies($id);
         
         $this->load->view('templates/header_home');
-        $this->load->view('home/task_manager_fifa_v', $data);
+        $this->load->view('home/task_manager_v', $data);
         $this->load->view('templates/footer');
     }
     

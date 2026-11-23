@@ -5,8 +5,11 @@ class TaskModel extends CI_Model {
     public function getTasksByStatus($status)
     {
         return $this->db
+            ->select("tasks.*, chats.name AS group_name, CONCAT(employee.first_name, ' ', employee.last_name) AS assignee_name")
+            ->join('chats', 'chats.id_chats=tasks.id_chats', 'left')
+            ->join('employee', 'employee.id=tasks.assigned_to', 'left')
             ->where('status', $status)
-            ->where('enable', 1)
+            ->where('tasks.enable', 1)
             ->get('tasks')
             ->result();
     }

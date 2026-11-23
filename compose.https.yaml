@@ -1,0 +1,8 @@
+# Optional LAN HTTPS; the original HTTP port and services remain available.
+services:
+  web:
+    ports:
+      - "0.0.0.0:${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./.certs:/etc/moonio-certs:ro
+      - ./.certs/https.conf:/etc/apache2/sites-enabled/moonio-https.conf:ro

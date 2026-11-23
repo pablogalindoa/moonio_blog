@@ -2,6 +2,7 @@
 """Create local-only development credentials without replacing an existing .env."""
 from pathlib import Path
 import os
+import base64
 import secrets
 
 root = Path(__file__).resolve().parent.parent
@@ -10,6 +11,9 @@ with (root / '.env').open('x') as output:
     output.write('\n'.join([
         '# Private Docker development settings; do not commit.',
         'DB_USER=moonio',
+        'MESSAGE_ENCRYPTION_KEY=' + base64.b64encode(secrets.token_bytes(32)).decode(),
+        'SMTP_USER=',
+        'SMTP_PASSWORD=',
         'DB_PASSWORD=' + secrets.token_urlsafe(32),
         'DB_ROOT_PASSWORD=' + secrets.token_urlsafe(32),
         'LOCAL_UID=' + str(os.getuid()),

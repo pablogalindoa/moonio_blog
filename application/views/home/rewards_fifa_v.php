@@ -7,15 +7,15 @@
         <div class="flex justify-between items-center mb-10">
             <div>
                 <h1 class="text-4xl font-extrabold text-yellow-400">
-                    Logros y Recompensas 🏆
+                    Logros y Recompensas 🌙
                 </h1>
                 <p class="text-gray-400 mt-2">
-                    Compite. Gana puntos. Asciende de división.
+                    Mantente Activo. Gana recompensas 💜
                 </p>
             </div>
 
             <div class="bg-yellow-400 text-black px-6 py-3 rounded-xl font-bold shadow-lg">
-                División: <?= $employee->division ?>
+                Nivel: <?= $employee->division ?>
             </div>
         </div>
 
@@ -41,12 +41,12 @@
                 <h2 class="text-4xl font-bold text-green-400">
                     <?= $employee->total_trophies ?>
                 </h2>
-                <p class="text-gray-400 mt-2">Retos Logrados ⚽</p>
+                <p class="text-gray-400 mt-2">Retos Logrados🌙</p>
             </div>
 
             <div class="bg-slate-800 border border-green-700 rounded-2xl p-6 text-center shadow-md">
-                <h2 class="text-4xl font-bold text-green-400">18</h2>
-                <p class="text-gray-400 mt-2">Video Conferencias Atendidas 🎥</p>
+                <h2 class="text-4xl font-bold text-green-400">—</h2>
+                <p class="text-gray-400 mt-2">Videollamadas (sin contador) 🎥</p>
             </div>
 
             <div class="bg-slate-800 border border-green-700 rounded-2xl p-6 text-center shadow-md">
@@ -106,3 +106,13 @@
     </div>
 
 </div>
+
+<section class="p-8 text-white bg-slate-900">
+    <h2>Clasificación de todos los usuarios</h2>
+    <p>Registro: 10 puntos · Inicio de sesión: 5 puntos · Referir un nuevo usuario: 25 puntos.</p>
+    <table><thead><tr><th>Usuario</th><th>Puntos</th></tr></thead><tbody>
+    <?php foreach ($ranking as $rank): ?>
+    <tr><td><?= html_escape($rank->first_name.' '.$rank->last_name) ?></td><td><?= (int)$rank->points ?></td></tr>
+    <?php endforeach; ?>
+    </tbody></table>
+</section>

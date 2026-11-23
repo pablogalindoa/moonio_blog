@@ -15,6 +15,7 @@ class ChatModel extends CI_Model {
         $this->db->select("
             messages.id_messages,
             messages.message,
+            messages.is_encrypted,
             messages.created_at,
             messages.id_employee,
             employee.first_name,
@@ -29,7 +30,15 @@ class ChatModel extends CI_Model {
 
         $this->db->order_by("messages.created_at", "ASC");
 
-        return $this->db->get()->result();
+        $messages = $this->db->get()->result();
+        $this->load->library('MessageCipher');
+        foreach ($messages as $message) {
+            if ($message->is_encrypted) {
+                try { $message->message = $this->messagecipher->decrypt($message->message); }
+                catch (RuntimeException $e) { $message->message = '[No se pudo descifrar: revisa la clave del servidor]'; }
+            }
+        }
+        return $messages;
     }
 
 
@@ -116,6 +125,12 @@ class ChatModel extends CI_Model {
             return strtotime($b->last_time) - strtotime($a->last_time);
         });
 
+        foreach ($allChats as $chat) {
+            $row = $this->db->query('SELECT COUNT(*) AS unread_count FROM messages m JOIN chat_participants cp ON cp.id_chats=m.id_chats WHERE cp.id_employee=? AND m.id_chats=? AND m.id_employee<>? AND m.id_messages>cp.last_read_message_id', [(int)$user_id, (int)$chat->id_chats, (int)$user_id])->row();
+            $chat->unread_count = (int)$row->unread_count;
+            // Do not expose encrypted storage envelopes in sidebar previews.
+            unset($chat->last_message);
+        }
         return $allChats;
     }
 

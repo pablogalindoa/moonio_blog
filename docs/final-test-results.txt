@@ -1,0 +1,48 @@
+Final delivery automated results — 2026-11-23
+
+PASS Registration without photo, password login, automatic Socket.IO connection: four independent sessions
+PASS Trusted HTTPS + secure browser context + Apache WebSocket upgrade
+PASS Duplicate and invalid email/password rejected
+PASS UI creates named group of three including creator; live discovery by B/C; invalid groups rejected
+PASS Private bidirectional real-time delivery and outsider history/notification isolation
+PASS Encryption ON/OFF and transparent decryption in real-time/history after refresh
+PASS Three-user group real-time broadcast; unrelated fourth user receives nothing
+PASS Inactive chat unread badge appears and clears on opening
+PASS Presence remains online with another tab and goes offline when last socket closes
+PASS Offline recipient gets persisted pending badge on reconnect and message on opening
+PASS Temporary network loss: auto-reconnect, re-register, rejoin, reload history without duplicates
+PASS History survives logout/login
+PASS Granted geolocation produces clickable persisted Maps link (synthetic coordinates)
+PASS Text/image/audio uploads, persisted chat links, exact recipient download bytes
+PASS 20 MB upload limit enforced by browser and backend
+PASS WebRTC offer/answer/ICE connects with remote audio+video tracks and hang-up cleanup (synthetic media)
+PASS Group task UI restricts assignee to members; create and advance twice; outsider assignment rejected
+PASS Rewards and shared ranking visible from two independent user accounts
+PASS Email selector lists registered users; arbitrary recipient rejected (no external email sent)
+PASS No browser JavaScript exceptions
+{
+  "passed": 20,
+  "group": 15,
+  "private": 16,
+  "task": 8,
+  "users": [
+    26,
+    27,
+    28,
+    29
+  ]
+}
+
+PASS http://localhost:8080: login, WebSocket and group history after reload
+PASS http://192.168.18.14:8080: login, WebSocket and group history after reload
+PASS https://192.168.18.14:8443: login, WebSocket and group history after reload
+PASS unauthenticated history and certificate private-file access denied
+
+PASS All 106 application PHP files syntax-checked in Docker
+PASS AES-GCM roundtrip, random IVs and tamper rejection
+PASS SMTP TLS connection and SMTP AUTH status 235 (no mail sent)
+PASS All four Docker services healthy
+PASS All 46 original messages and 19 original accounts retained
+PASS DB proof: chat 15 has three participants, chat 16 has two; message 93 encrypted; task 8/group 15/assignee 27/status goal
+
+Manual: team roster, second-device trust, native camera/microphone/GPS, inbox receipt.

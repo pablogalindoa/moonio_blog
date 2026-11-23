@@ -9,7 +9,7 @@ class EmployeeController extends CI_Controller {
     public function index() 
     {
         if (!$this->session->userdata('id')) {
-            redirect(base_url('index.php/login'));
+            redirect('login');
         }
         
         $this->load->view('templates/header');
@@ -86,7 +86,7 @@ class EmployeeController extends CI_Controller {
         $this->form_validation->set_rules(
             'email',
             'Email',
-            'required|valid_email|callback_valid_single_com|regex_match[/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/]',
+            'required|is_unique[employee.email]|valid_email|callback_valid_single_com|regex_match[/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/]',
             array('regex_match' => 'El email debe estar en minúsculas y en un formato válido.')
         );
 
@@ -103,23 +103,21 @@ class EmployeeController extends CI_Controller {
         
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('templates/header');
-            $this->load->view('frontend/create');
+            $this->load->view('frontend/create', ['employees'=>$this->emp->getEmployee()]);
             $this->load->view('templates/footer');
             return;
         }
 
         $referrer = $this->input->post('referrer_id') ?: NULL;
-        if($referrer){
-            $this->emp->addPoints($referrer, 3);
-        }
+
         
-        if (!$this->upload->do_upload('profile_picture')) {
-            $error = array('error' => $this->upload->display_errors());
+        if (!empty($_FILES['profile_picture']['name']) && !$this->upload->do_upload('profile_picture')) {
+            $error = array('error' => $this->upload->display_errors(), 'employees' => $this->emp->getEmployee());
             $this->load->view('frontend/create', $error);
             $this->session->set_flashdata('status','Failed to Insert Picture');
         } else {
             $data = $this->upload->data();
-            $image_path = 'uploads/users/' . $data['file_name']; 
+            $image_path = empty($_FILES['profile_picture']['name']) ? 'assets/img/moonio-mark.svg' : 'uploads/users/' . $data['file_name'];
             
             $data = [
                 'first_name' => $this->input->post('first_name'),
@@ -132,8 +130,9 @@ class EmployeeController extends CI_Controller {
             ];
             
             if ($this->emp->insertEmployee($data)) {
+                if ($referrer && $this->emp->getEmployeeById((int)$referrer)) $this->emp->addPoints((int)$referrer, 3);
                 $this->session->set_flashdata('status','Data de usuario ha sido insertada satisfactoriamente!');
-                redirect(base_url('index.php/login'));
+                redirect('login');
             } else {
                 echo $this->db->error()['message']; 
                 exit;

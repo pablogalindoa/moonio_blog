@@ -3,6 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Api extends CI_Controller {
 
+    public function health() {
+        $ok = (bool)$this->db->query('SELECT 1')->row();
+        $this->output->set_content_type('application/json')->set_output(json_encode(['ok'=>$ok]));
+    }
     public function champions() {
         $this->load->model('ChampionsModel');
 
@@ -21,51 +25,10 @@ class Api extends CI_Controller {
         header("Content-Type: application/json");
         echo json_encode($response, JSON_PRETTY_PRINT);
     }
-    public function user_chats($user_id) {
-
-        $this->load->model("ChatModel");
-
-        $chats = $this->ChatModel->getUserChats($user_id);
-
-        header("Content-Type: application/json");
-        echo json_encode($chats);
-    }
-
-    public function messages($chat_id) {
-
-        $this->load->model("ChatModel");
-
-        $messages = $this->ChatModel->getMessages($chat_id);
-
-        header("Content-Type: application/json");
-        echo json_encode($messages);
-    }
-
-    public function save_message() {
-
-        $data = $this->input->post();
-
-        if (!$data) {
-            echo json_encode([
-                "status" => "error",
-                "message" => "No data received"
-            ]);
-            return;
-        }
-
-        $this->load->model("ChatModel");
-
-        $this->ChatModel->insertMessage([
-            'id_chats' => $data['chat_id'],
-            'id_employee' => $data['user_id'],
-            'message' => $data['message']
-        ]);
-
-        echo json_encode(["status" => "ok"]);
-    }
     public function users() {
 
-        $this->db->select("id, first_name, last_name, profile_picture");
+        if (!$this->session->userdata("id")) { show_error("Inicia sesión", 401); return; }
+        $this->db->where("enable", 1)->select("id, first_name, last_name, profile_picture");
 
         $users = $this->db->get("employee")->result();
 

@@ -1,0 +1,113 @@
+Git review before delivery commit — 2026-11-23
+
+Audited staged changes (git diff --cached --stat):
+ .env.example                                       |   6 +
+ .gitignore                                         |   5 +-
+ application/config/routes.php                      |   5 +-
+ application/controllers/Api.php                    |  49 +----
+ application/controllers/ChatController.php         | 119 ++++++------
+ application/controllers/FileTransferController.php |   2 +-
+ application/controllers/HomeController.php         |   7 +-
+ application/controllers/SmtpController.php         |  76 ++++++++
+ application/controllers/TaskController.php         |  25 ++-
+ .../controllers/frontend/EmployeeController.php    |  19 +-
+ application/libraries/MessageCipher.php            |  28 +++
+ application/models/ChatModel.php                   |  17 +-
+ application/models/TaskModel.php                   |   5 +-
+ application/views/home/chats2_v.php                |  81 ++++++--
+ application/views/home/rewards_fifa_v.php          |  22 ++-
+ application/views/home/smtp_fifa_v.php             |  35 ++--
+ application/views/home/task_create_v.php           | 210 ++++++++++++++++++++
+ application/views/home/task_edit_v.php             | 201 +++++++++++++++++++
+ application/views/home/task_manager2_v.php         | 212 +++++++++++++++++++++
+ assets/img/end_call.png                            | Bin 0 -> 834270 bytes
+ assets/img/files.png                               | Bin 0 -> 579727 bytes
+ assets/img/location.png                            | Bin 0 -> 372922 bytes
+ assets/img/video_call.png                          | Bin 0 -> 629050 bytes
+ chat-server/server.js                              | 104 ++++++----
+ compose.https.yaml                                 |   8 +
+ compose.yaml                                       |   3 +
+ docker/apache/app.conf                             |   2 +-
+ docker/php/Dockerfile                              |   2 +-
+ docker/php/healthcheck.php                         |   2 +-
+ docs/final-delivery.md                             | 163 ++++++++++++++++
+ docs/final-test-results.txt                        |  48 +++++
+ scripts/create-docker-env.py                       |   4 +
+ scripts/final-audit.cjs                            | 120 ++++++++++++
+ scripts/migrations/final-delivery.sql              |   4 +
+ scripts/setup-lan-https.sh                         |  18 ++
+ 35 files changed, 1407 insertions(+), 195 deletions(-)
+
+Remaining working-tree diff (git diff --stat; includes pre-existing work):
+ .../controllers/frontend/EmployeeController.php    |    2 +-
+ application/models/EmployeeModel.php               |   16 +-
+ application/views/blogs/blog_request.php           |    3 +-
+ application/views/blogs/blogcreate.php             |    3 +-
+ application/views/champions/champions_timeline.php |    3 +-
+ application/views/demo_page.php                    |    3 +-
+ application/views/home/chats_fifa_v.php            |  636 -----------
+ application/views/home/ftp_center_fifa_v.php       |  114 --
+ application/views/home/task_create_fifa_v.php      |  193 ----
+ application/views/home/task_edit_fifa_v.php        |  201 ----
+ application/views/home/task_manager_fifa_v.php     |  205 ----
+ application/views/templates/header.php             |    3 +-
+ application/views/templates/header_blog.php        |    3 +-
+ application/views/templates/header_blog_admin.php  |    3 +-
+ application/views/templates/header_user.php        |    3 +-
+ assets/css/moonio-theme.css                        | 1121 ++++++++++++++++----
+ 16 files changed, 940 insertions(+), 1572 deletions(-)
+
+Status before commit (git status --short):
+M  .env.example
+M  .gitignore
+M  application/config/routes.php
+M  application/controllers/Api.php
+M  application/controllers/ChatController.php
+M  application/controllers/FileTransferController.php
+M  application/controllers/HomeController.php
+A  application/controllers/SmtpController.php
+M  application/controllers/TaskController.php
+MM application/controllers/frontend/EmployeeController.php
+A  application/libraries/MessageCipher.php
+M  application/models/ChatModel.php
+ M application/models/EmployeeModel.php
+M  application/models/TaskModel.php
+ M application/views/blogs/blog_request.php
+ M application/views/blogs/blogcreate.php
+ M application/views/champions/champions_timeline.php
+ M application/views/demo_page.php
+M  application/views/home/chats2_v.php
+ D application/views/home/chats_fifa_v.php
+ D application/views/home/ftp_center_fifa_v.php
+M  application/views/home/rewards_fifa_v.php
+M  application/views/home/smtp_fifa_v.php
+ D application/views/home/task_create_fifa_v.php
+A  application/views/home/task_create_v.php
+ D application/views/home/task_edit_fifa_v.php
+A  application/views/home/task_edit_v.php
+A  application/views/home/task_manager2_v.php
+ D application/views/home/task_manager_fifa_v.php
+ M application/views/templates/header.php
+ M application/views/templates/header_blog.php
+ M application/views/templates/header_blog_admin.php
+ M application/views/templates/header_user.php
+ M assets/css/moonio-theme.css
+A  assets/img/end_call.png
+A  assets/img/files.png
+A  assets/img/location.png
+A  assets/img/video_call.png
+M  chat-server/server.js
+A  compose.https.yaml
+M  compose.yaml
+M  docker/apache/app.conf
+M  docker/php/Dockerfile
+M  docker/php/healthcheck.php
+A  docs/final-delivery.md
+A  docs/final-test-results.txt
+M  scripts/create-docker-env.py
+A  scripts/final-audit.cjs
+A  scripts/migrations/final-delivery.sql
+A  scripts/setup-lan-https.sh
+?? assets/img/pic1.jpg
+
+The staged task_edit_v.php and four action-icon assets were already present locally; they are included as dependencies of the tested chat/task views. Other pre-existing theme/blog/employee-model changes and old-view deletions are preserved and left uncommitted. No .env, certificate/private key, database export, upload or test account credentials are staged.

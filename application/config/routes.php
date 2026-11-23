@@ -57,7 +57,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'fronted/login';
+$route['default_controller'] = 'Frontend/EmployeeController/login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
@@ -151,3 +151,6 @@ $route['api/messages/(:num)'] = 'ChatController/get_messages/$1';
 $route['api/user_chats/(:num)'] = 'ChatController/get_user_chats/$1';
 
 $route['api/users'] = 'Api/users';
+
+$route['api/socket_session'] = 'ChatController/socket_session';
+$route['api/mark_read/(:num)'] = 'ChatController/mark_read/$1';

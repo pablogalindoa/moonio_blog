@@ -7,6 +7,21 @@ const userImage = <?= json_encode(base_url($this->session->userdata('profile_pic
 const socket = io(window.location.origin);
 let currentChatId = null, currentRoom = null, pendingSend = false;
 const visibleMessages = new Set();
+let onlineUsers = new Set();
+function updatePresence() {
+    document.querySelectorAll('[data-peer-id]').forEach(node => {
+        node.textContent = onlineUsers.has(Number(node.dataset.peerId)) ? ' ● En línea' : ' ○ Desconectado';
+    });
+    const node = document.getElementById('peerStatus');
+    if (node) node.textContent = currentPeerId ? (onlineUsers.has(Number(currentPeerId)) ? 'En línea' : 'Desconectado') : '';
+}
+socket.on('presence', ids => { onlineUsers = new Set(ids); updatePresence(); });
+socket.on('chats_changed', () => loadChats().catch(e=>notice(e.message)));
+socket.on('connect_error', e => notice(e.message));
+async function markRead(chatId, messageId) {
+    await fetch(`${BASE_URL}index.php/api/mark_read/${chatId}`, {method:'POST', body:new URLSearchParams({message_id:messageId})});
+    await loadChats();
+}
 function notice(text) { document.getElementById('chatStatus').textContent = text; }
 function renderMessage(msg) {
     const id = String(msg.id_messages);
@@ -16,7 +31,7 @@ function renderMessage(msg) {
     box.dataset.messageId = id;
     box.className = 'chat-message ' + (Number(msg.id_employee ?? msg.user_id) === userId ? 'mine' : '');
     const name = document.createElement('small');
-    name.textContent = msg.first_name ?? msg.user_name ?? '';
+    name.textContent = (msg.first_name ?? msg.user_name ?? '') + (Number(msg.is_encrypted) ? ' 🔒 Cifrado' : '');
     box.append(name, document.createElement('br'));
     const body = String(msg.message);
     for (const part of body.split(/(https?:\/\/[^\s]+|\/blog\/index\.php\/ftp\/download\/\d+)/g)) {
@@ -33,7 +48,7 @@ async function sendText(message, chatId = currentChatId) {
     if (!chatId) throw new Error('Selecciona una conversación.');
     if (!socket.connected) throw new Error('Sin conexión. Espera a reconectar.');
     return new Promise((resolve, reject) => socket.timeout(15000).emit('send_message', {
-        message, user_name:userName, user_id:userId, chat_id:chatId, room:'chat_' + chatId
+        message, encrypted:document.getElementById('encryptMessage').checked, user_name:userName, user_id:userId, chat_id:chatId, room:'chat_' + chatId
     }, (err, result) => {
         if (err) return reject(new Error('Sin confirmación. Revisa el historial antes de reenviar.'));
         if (result.status !== 'ok') return reject(new Error(result.message));
@@ -48,14 +63,23 @@ async function sendMessage() {
     catch(e) { notice(e.message); }
     finally { pendingSend = false; }
 }
-socket.on('receive_message', data => { if (Number(data.chat_id) === currentChatId) renderMessage(data); loadChats().catch(e=>notice(e.message)); });
+socket.on('receive_message', data => {
+    if (Number(data.chat_id) === currentChatId) {
+        renderMessage(data);
+        markRead(currentChatId, data.id_messages).catch(e=>notice(e.message));
+    } else {
+        if (Number(data.user_id) !== userId) notice('Nuevo mensaje en otra conversación');
+        loadChats().catch(e=>notice(e.message));
+    }
+});
 async function loadMessages(chatId) {
     const response = await fetch(`${BASE_URL}index.php/api/messages/${chatId}`);
     if (!response.ok) throw new Error('No se pudo cargar el historial.');
     const messages = await response.json();
     if (currentChatId !== chatId) return;
     messages.forEach(renderMessage);
-    // History and live delivery can overlap: merge by database ID, then order.
+    if (messages.length) await markRead(chatId, Math.max(...messages.map(m=>Number(m.id_messages))));
+
     const chat = document.getElementById('chat');
 }
 async function loadChats() {
@@ -66,11 +90,19 @@ async function loadChats() {
         const button = document.createElement('button'); button.className = 'chat-action';
         const name = chat.type === 'grupo' ? chat.name : chat.first_name + ' ' + chat.last_name;
         button.textContent = name;
+        if (chat.other_user_id) {
+            const presence = document.createElement('small'); presence.dataset.peerId = chat.other_user_id; button.append(presence);
+        }
+        if (chat.unread_count > 0) {
+            const badge = document.createElement('strong'); badge.className = 'unread-badge';
+            badge.textContent = ` (${chat.unread_count} sin leer)`; button.append(badge);
+        }
         button.dataset.chatId = chat.id_chats;
         button.setAttribute('aria-pressed', String(Number(chat.id_chats) === currentChatId));
         button.onclick = () => openChat(Number(chat.id_chats), name, BASE_URL + (chat.profile_picture || ''), chat.other_user_id);
         list.append(button);
     });
+    updatePresence();
 }
 function openChat(chatId, name, image, peerId) {
     if (currentRoom) socket.emit('leave_room', currentRoom);
@@ -80,6 +112,7 @@ function openChat(chatId, name, image, peerId) {
     document.getElementById('chatTitle').textContent = name;
     document.getElementById('chatAvatar').src = image;
     socket.emit('join_room', currentRoom);
+    updatePresence();
     loadMessages(chatId).catch(e=>notice(e.message));
 }
 function shareLocation() {
@@ -180,15 +213,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     <div>
                         <h3 id="chatTitle" class="text-xl font-bold text-purple-300"></h3>
+                        <p id="peerStatus" class="text-sm text-gray-400"></p>
                         <p id="chatStatus" class="text-sm text-gray-400"></p>
                     </div>
                 </div>
 
                 <div class="moon-chat-actions flex flex-wrap gap-2">
-                    <button class="chat-action" onclick="startCall().catch(e=>{notice(e.message); endCall();})"><span class="moon-icon" aria-hidden="true">📹</span> Videollamada</button>
-                    <button class="chat-action" onclick="shareLocation()"><span class="moon-icon" aria-hidden="true">📍</span> Ubicación</button>
-                    <button class="chat-action" onclick="pickFile()"><span class="moon-icon" aria-hidden="true">📎</span> Archivo</button>
-                    <button class="chat-action chat-hangup" onclick="endCall()">Colgar</button>
+                    <button class="chat-action" onclick="startCall().catch(e=>{notice(e.message); endCall();})">
+                        <span class="moon-icon" aria-hidden="true">
+                            <img src="../assets/img/video_call.png" alt="">
+                        </span> Videollamada
+                    </button>
+                    <button class="chat-action" onclick="shareLocation()">
+                        <span class="moon-icon" aria-hidden="true">
+                            <img src="<?= base_url('assets/img/location.png') ?>" alt="">
+                        </span>
+                        Ubicación
+                    </button>
+
+                    <button class="chat-action" onclick="pickFile()">
+                        <span class="moon-icon" aria-hidden="true">
+                            <img src="<?= base_url('assets/img/files.png') ?>" alt="">
+                        </span>
+                        Archivo
+                    </button>
+                    <button class="chat-action chat-hangup" onclick="endCall()">
+                        <span class="moon-icon" aria-hidden="true">
+                            <img src="<?= base_url('assets/img/end_call.png') ?>" alt="">
+                        </span>
+                        Colgar
+                    </button>
                     <input id="chatFile" type="file" hidden onchange="shareFile(this)">
                 </div>
             </div>
@@ -210,7 +264,7 @@ window.addEventListener('DOMContentLoaded', () => {
             <div class="moon-chat-composer p-6 border-t border-purple-700 bg-slate-950">
                 <div class="flex items-center gap-4 bg-slate-800 px-4 py-3 rounded-full border border-purple-700 shadow-inner">
 
-                    <button class="text-green-400 text-xl">➕</button>
+<label title="Cifra el texto guardado en la base de datos; el servidor puede descifrarlo."><input type="checkbox" id="encryptMessage"> Cifrado ON/OFF</label>
 
                     <input
                         type="text"
@@ -307,6 +361,7 @@ window.addEventListener('DOMContentLoaded', () => {
     socket.on("connect", () => {
         socket.emit("register_user", userId);
         if (currentRoom) { socket.emit('join_room', currentRoom); loadMessages(currentChatId).catch(e=>notice(e.message)); }
+        loadChats().catch(e=>notice(e.message));
         notice('Conectado');
     });
 
@@ -434,7 +489,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const result = await response.json();
 
-        console.log(result);
+        if (!response.ok || result.status !== 'ok') return alert(result.message || 'No se pudo crear la conversación.');
+        socket.emit('chat_created', result.chat_id);
 
         closeCreateGroupModal();
 
@@ -507,7 +563,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const accept = confirm("📞 Incoming call. Accept?");
 
-        if (!accept || peerConnection) return;
+        if (!accept || peerConnection) { socket.emit('end_call', {to:data.from}); return; }
         callPeerId = data.from;
 
         localStream = await getMediaStream();
@@ -562,7 +618,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on("end_call", () => endCall(false));
-    socket.on("disconnect", () => notice("Desconectado. Reconectando…"));
+    socket.on("disconnect", () => { onlineUsers.clear(); updatePresence(); endCall(false); notice("Desconectado. Reconectando…"); });
     function endCall(notifyPeer = true) {
 
         if (peerConnection) {
@@ -578,6 +634,7 @@ window.addEventListener('DOMContentLoaded', () => {
         callPeerId = null; pendingIce = [];
         document.getElementById('localVideo').srcObject = null;
         document.getElementById('remoteVideo').srcObject = null;
+        document.querySelector('.moon-call-preview').style.display = 'none';
     }
 
 

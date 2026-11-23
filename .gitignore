@@ -16,7 +16,6 @@ node_modules/
 
 # Existing credential-bearing source: preserve locally, do not commit.
 # No credentials are removed or rotated during the baseline phase.
-/application/controllers/SmtpController.php
 /application/controllers/ExternalApi.php
 /application/controllers/PageController.php
 
@@ -89,3 +88,7 @@ Desktop.ini
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
+
+# Reviewed additive rubric migration (private database exports remain ignored).
+!/scripts/migrations/*.sql
+/.certs/
