@@ -107,12 +107,32 @@
 
 </div>
 
-<section class="p-8 text-white bg-slate-900">
-    <h2>Clasificación de todos los usuarios</h2>
-    <p>Registro: 10 puntos · Inicio de sesión: 5 puntos · Referir un nuevo usuario: 25 puntos.</p>
-    <table><thead><tr><th>Usuario</th><th>Puntos</th></tr></thead><tbody>
-    <?php foreach ($ranking as $rank): ?>
-    <tr><td><?= html_escape($rank->first_name.' '.$rank->last_name) ?></td><td><?= (int)$rank->points ?></td></tr>
-    <?php endforeach; ?>
-    </tbody></table>
+<link rel="stylesheet" href="<?= base_url('assets/css/moonio-reward-profiles.css') ?>">
+<section class="moon-ranking" aria-labelledby="rankingTitle" data-base-url="<?= html_escape(base_url()) ?>">
+    <h2 id="rankingTitle">Clasificación de todos los usuarios</h2>
+    <p>Selecciona un usuario para ver sus recompensas obtenidas.</p>
+    <p class="moon-ranking-rules">Registro: 10 puntos · Inicio de sesión: 5 puntos · Referir un nuevo usuario: 25 puntos.</p>
+    <table>
+        <thead><tr><th scope="col">Usuario</th><th scope="col">Puntos</th></tr></thead>
+        <tbody>
+        <?php foreach ($ranking as $position => $rank): ?>
+        <tr>
+            <td><button type="button" class="moon-reward-user" data-profile-url="<?= site_url('rewards/profile/'.(int)$rank->id) ?>" aria-haspopup="dialog" aria-controls="rewardProfile">
+                <span class="moon-ranking-position" aria-hidden="true"><?= $position + 1 ?></span>
+                <span><?= html_escape($rank->first_name.' '.$rank->last_name) ?></span>
+                <span class="moon-profile-hint" aria-hidden="true">Ver logros ↗</span>
+            </button></td>
+            <td class="moon-ranking-points"><?= (int)$rank->points ?></td>
+        </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 </section>
+<dialog id="rewardProfile" class="moon-reward-dialog" aria-labelledby="rewardProfileTitle">
+    <header class="moon-reward-dialog-header">
+        <h2 id="rewardProfileTitle">Perfil de recompensas</h2>
+        <button type="button" class="moon-reward-close" aria-label="Cerrar perfil">✕</button>
+    </header>
+    <div id="rewardProfileContent" aria-live="polite" aria-busy="false"></div>
+</dialog>
+<script src="<?= base_url('assets/js/moonio-reward-profiles.js') ?>" defer></script>

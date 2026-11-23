@@ -1,0 +1,52 @@
+.moon-ranking { margin: 24px auto; width: calc(100% - 32px); max-width: 1100px; padding: 24px; box-sizing: border-box;
+    border: 1px solid #514675; border-radius: 20px; background: #111a32; color: #f4efff; }
+.moon-ranking h2 { font-size: 24px; margin: 0 0 8px; }
+.moon-ranking p { color: #c7c2de; line-height: 1.6; }
+.moon-ranking .moon-ranking-rules { font-size: 13px; }
+.moon-ranking table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 20px; }
+.moon-ranking th { text-align: left; color: #bda7ef; padding: 12px 8px; }
+.moon-ranking th:last-child { width: 92px; text-align: right; }
+.moon-ranking td { border-top: 1px solid #302b50; padding: 8px; vertical-align: middle; }
+.moon-ranking .moon-ranking-points { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 700; color: #e3d5ff; }
+.moon-ranking .moon-reward-user { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: transparent;
+    color: #f4efff; border: 0; border-radius: 10px; padding: 12px 8px; cursor: pointer; font: inherit; }
+.moon-reward-user > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+.moon-ranking-position { flex: 0 0 24px; color: #bda7ef; font-size: 13px; }
+.moon-profile-hint { margin-left: auto; flex-shrink: 0; font-size: 12px; color: #c9b4fa; }
+.moon-ranking .moon-reward-user:hover { background: #292244; }
+.moon-reward-user:focus-visible, .moon-reward-close:focus-visible { outline: 2px solid #b99aff; outline-offset: 2px; }
+.moon-reward-dialog { padding: 24px; box-sizing: border-box; width: min(640px, calc(100vw - 24px)); max-height: calc(100dvh - 32px);
+    overflow-y: auto; border: 1px solid #8067b1; border-radius: 22px; background: linear-gradient(145deg, #211b3b, #111e35); color: #f4efff;
+    box-shadow: 0 24px 80px #0008; }
+.moon-reward-dialog::backdrop { background: #080a1ac7; backdrop-filter: blur(4px); }
+.moon-reward-dialog[open] { animation: moon-reward-enter 180ms ease-out; }
+.moon-reward-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.moon-reward-dialog-header h2 { font-size: 20px; margin: 0; }
+.moon-reward-dialog .moon-reward-close { flex: 0 0 36px; height: 36px; border: 1px solid #685186; border-radius: 10px; background: #35294f; color: #fff; cursor: pointer; }
+.moon-reward-identity { display: flex; align-items: center; gap: 18px; }
+.moon-reward-photo { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 50%; object-fit: cover; background: #35294f; border: 2px solid #9475cd; }
+.moon-reward-person { min-width: 0; overflow-wrap: anywhere; }
+.moon-reward-name { margin: 0 0 6px; font-size: 22px; }
+.moon-reward-division { margin: 0; color: #cdb9f5; }
+.moon-reward-total { padding: 16px; background: #ffffff08; border-radius: 12px; color: #d0c7e8; }
+.moon-reward-total strong { color: #e5d2ff; font-size: 28px; margin-right: 8px; }
+.moon-earned-title { font-size: 18px; margin: 24px 0 14px; }
+.moon-earned-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.moon-earned-trophy { padding: 18px; border: 1px solid #655087; border-radius: 14px; background: #1c223f; overflow-wrap: anywhere; }
+.moon-earned-icon { font-size: 32px; }
+.moon-earned-trophy h4 { font-size: 16px; margin: 10px 0 6px; color: #e5d2ff; }
+.moon-earned-trophy p, .moon-earned-requirement { font-size: 14px; line-height: 1.5; color: #cdc9df; }
+.moon-earned-requirement { display: block; color: #b6a4d7; margin-top: 12px; }
+.moon-reward-empty { grid-column: 1 / -1; color: #cdc9df; }
+.moon-reward-error { color: #ffc4da; }
+@keyframes moon-reward-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) {
+    .moon-ranking { padding: 16px 8px; }
+    .moon-ranking h2, .moon-ranking > p { padding: 0 8px; }
+    .moon-profile-hint { display: none; }
+    .moon-ranking th:last-child { width: 68px; }
+    .moon-ranking .moon-reward-user { gap: 6px; padding-left: 0; }
+    .moon-reward-dialog { padding: 18px; }
+    .moon-earned-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .moon-reward-dialog[open] { animation: none; } }

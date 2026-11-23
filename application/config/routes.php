@@ -154,3 +154,5 @@ $route['api/users'] = 'Api/users';
 
 $route['api/socket_session'] = 'ChatController/socket_session';
 $route['api/mark_read/(:num)'] = 'ChatController/mark_read/$1';
+
+$route['rewards/profile/(:num)'] = 'HomeController/rewardProfile/$1';

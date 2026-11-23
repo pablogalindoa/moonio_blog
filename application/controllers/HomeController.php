@@ -119,7 +119,7 @@ class HomeController extends CI_Controller {
     public function rewards()
     {
         if (!$this->session->userdata('id')) { redirect('login'); return; }
-        $data['ranking'] = $this->db->select('first_name,last_name,points')->where('enable',1)->order_by('points','DESC')->get('employee')->result();
+        $data['ranking'] = $this->db->select('id,first_name,last_name,points')->where('enable',1)->order_by('points','DESC')->get('employee')->result();
         $id = $this->session->userdata('id');
         $data['employee'] = $this->emp->getAllEmployeeInfo($id);
         $data['trophies'] = $this->emp->getTrophies($id);
@@ -127,6 +127,39 @@ class HomeController extends CI_Controller {
         $this->load->view('templates/header_home');
         $this->load->view('home/rewards_fifa_v', $data);
         $this->load->view('templates/footer');
+    }
+
+    public function rewardProfile($id)
+    {
+        $this->output->set_content_type('application/json')->set_header('Cache-Control: no-store');
+        if (!$this->session->userdata('id')) {
+            $this->output->set_status_header(401)->set_output(json_encode(['error'=>'Inicia sesión para ver las recompensas.']));
+            return;
+        }
+        if (!$this->db->where('id', (int)$id)->where('enable', 1)->count_all_results('employee')) {
+            $this->output->set_status_header(404)->set_output(json_encode(['error'=>'Este perfil no está disponible.']));
+            return;
+        }
+        $employee = $this->emp->getAllEmployeeInfo((int)$id);
+        $earned = [];
+        foreach ($this->emp->getTrophies((int)$id) as $trophy) {
+            if ($trophy->unlocked) {
+                $earned[] = [
+                    'icon'=>$trophy->icon, 'name'=>$trophy->trophy_name,
+                    'description'=>$trophy->description,
+                    'requirement_type'=>$trophy->requirement_type,
+                    'requirement_value'=>(int)$trophy->requirement_value
+                ];
+            }
+        }
+        // Public reward fields only; never return the full employee/account record.
+        $this->output->set_output(json_encode([
+            'id'=>(int)$employee->id,
+            'name'=>$employee->first_name.' '.$employee->last_name,
+            'profile_picture'=>$employee->profile_picture,
+            'points'=>(int)$employee->points, 'division'=>$employee->division,
+            'trophies'=>$earned
+        ]));
     }
 
     public function taskManager()
